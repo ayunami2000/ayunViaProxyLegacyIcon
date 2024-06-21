@@ -1,18 +1,22 @@
 package me.ayunami2000.ayunViaProxyLegacyIcon;
 
-import java.io.*;
-
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import net.lenni0451.lambdaevents.EventHandler;
+import net.raphimc.netminecraft.constants.MCPipeline;
+import net.raphimc.netminecraft.packet.impl.status.S2CStatusResponsePacket;
+import net.raphimc.viaproxy.ViaProxy;
+import net.raphimc.viaproxy.plugins.ViaProxyPlugin;
+import net.raphimc.viaproxy.plugins.events.Proxy2ServerChannelInitializeEvent;
+import net.raphimc.viaproxy.plugins.events.types.ITyped;
 import net.raphimc.viaproxy.proxy.util.ExceptionUtil;
-import net.raphimc.viaproxy.util.logging.*;
-import java.nio.file.*;
-import net.raphimc.viaproxy.plugins.*;
-import net.raphimc.viaproxy.plugins.events.*;
-import net.raphimc.viaproxy.plugins.events.types.*;
-import net.lenni0451.lambdaevents.*;
-import io.netty.channel.*;
-import net.raphimc.netminecraft.packet.impl.status.*;
-import com.google.gson.*;
-import java.util.*;
+import net.raphimc.viaproxy.util.logging.Logger;
+
+import java.io.File;
+import java.nio.file.Files;
+import java.util.Base64;
 
 public class Main extends ViaProxyPlugin
 {
@@ -31,13 +35,13 @@ public class Main extends ViaProxyPlugin
             Logger.LOGGER.error("Failed to read server-icon.png!");
             return;
         }
-        PluginManager.EVENT_MANAGER.register(this);
+        ViaProxy.EVENT_MANAGER.register(this);
     }
     
     @EventHandler
     public void onEvent(final Proxy2ServerChannelInitializeEvent event) {
         if (event.getType() == ITyped.Type.POST) {
-            event.getChannel().pipeline().addBefore("handler", "ayun-legacy-icon-injector", new LegacyIconInjector());
+            event.getChannel().pipeline().addBefore(MCPipeline.HANDLER_HANDLER_NAME, "ayun-legacy-icon-injector", new LegacyIconInjector());
         }
     }
     
@@ -59,7 +63,7 @@ public class Main extends ViaProxyPlugin
         }
 
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-            ExceptionUtil.handleNettyException(ctx, cause, null);
+            ExceptionUtil.handleNettyException(ctx, cause, null, true);
         }
     }
 }
